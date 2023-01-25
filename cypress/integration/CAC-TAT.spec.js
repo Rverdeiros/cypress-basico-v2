@@ -15,6 +15,8 @@
 /// <reference types="Cypress" />
 
 describe('Central de Atendimento ao Cliente TAT', function () {
+    const THREE_SECONDS_IN_MS = 3000
+
     beforeEach(function () {
         cy.visit('./src/index.html')
     })
@@ -23,18 +25,26 @@ describe('Central de Atendimento ao Cliente TAT', function () {
     })
     it('preenche os campos obrigatórios e envia o formulário', function () {
 
-        const longText = 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.'
-        
+        const longText = Cypress._.repeat('Teste ', 20) //Comando para repetir o texto "Teste " 20 vezes)
+
+        cy.clock() //Congela o relógio do navegador
+
         cy.get('#firstName').type('Nome Teste')
         cy.get('#lastName').type('Sobrenome Teste')
         cy.get('#email').type('teste@teste.com')
         cy.get('#phone').type('12345')
         cy.get('#open-text-area').type(longText, { delay: 0 })
-        cy.contains('.button', 'Enviar').click()
 
+        cy.contains('.button', 'Enviar').click()
         cy.get('.success').should('be.visible')
+
+        cy.tick(THREE_SECONDS_IN_MS)   //avança o relógio em 3 segundos
+        cy.get('.success').should('not.be.visible')
+
     })
     it('exibe mensagem de erro ao submeter o formulário com um email com formatação inválida', function () {
+
+        cy.clock() //Congela o relógio do navegador
 
         cy.get('#firstName').type('Nome Teste')
         cy.get('#lastName').type('Sobrenome Teste')
@@ -44,13 +54,20 @@ describe('Central de Atendimento ao Cliente TAT', function () {
 
         cy.contains('button[type="submit"]', 'Enviar').click()
         cy.get('.error').should('be.visible')
-    })
-    it('Validar campo vazio ao entrar com dados não numéricos', function () {
 
-        cy.get('#phone').type('teste')
-        cy.get('#phone').should('have.text', '')
+        cy.tick(THREE_SECONDS_IN_MS)   //avança o relógio em 3 segundos
+        cy.get('.error').should('not.be.visible')
+    })
+    Cypress._.times(5, function () {
+        it('campo telefone continua vazio quando preenchido com valor não numérico', function () {
+
+            cy.get('#phone').type('teste')
+            cy.get('#phone').should('have.text', '')
+        })
     })
     it('exibe mensagem de erro quando o telefone se torna obrigatório mas não é preenchido antes do envio do formulário', function () {
+
+        cy.clock() //Congela o relógio do navegador
 
         cy.get('#firstName').type('Nome Teste')
         cy.get('#lastName').type('Sobrenome Teste')
@@ -62,6 +79,9 @@ describe('Central de Atendimento ao Cliente TAT', function () {
 
         cy.contains('.button', 'Enviar').click()
         cy.get('.error').should('be.visible')
+
+        cy.tick(THREE_SECONDS_IN_MS)   //avança o relógio em 3 segundos
+        cy.get('.error').should('not.be.visible')
 
     })
     it('preeenche e limpa os campos nome, sobrenome, email e telefone', function () {
@@ -89,14 +109,25 @@ describe('Central de Atendimento ao Cliente TAT', function () {
     })
     it('exibe mensagem de erro ao submeter o formulário sem preencher os campos obrigatórios', function () {
 
+        cy.clock() //Congela o relógio do navegador
+
         cy.get('button[type="submit"]').click()
         cy.get('.error').should('be.visible')
 
+        cy.tick(THREE_SECONDS_IN_MS)   //avança o relógio em 3 segundos
+        cy.get('.error').should('not.be.visible')
+
     })
     it('envia o formulário com sucesso usando um comando customizado', function () {
+
+        cy.clock() //Congela o relógio do navegador
+
         cy.fillMandatoryFieldsAndSubmit()
 
         cy.get('.success').should('be.visible')
+
+        cy.tick(THREE_SECONDS_IN_MS)   //avança o relógio em 3 segundos
+        cy.get('.success').should('not.be.visible')
     })
     it('seleciona um produto (Youtube) por seu texto', function () {
         cy.get('#product')
@@ -146,7 +177,7 @@ describe('Central de Atendimento ao Cliente TAT', function () {
     it('seleciona um arquivo simulando um drag-and-drop', function () {
         cy.get('input[type="file"]#file-upload')
             .should('not.have.value')
-            .selectFile('./cypress/fixtures/example.json', {action: 'drag-drop'})
+            .selectFile('./cypress/fixtures/example.json', { action: 'drag-drop' })
             .should(function ($input) {
                 console.log($input)
                 expect($input[0].files[0].name).to.equal('example.json')
@@ -161,26 +192,7 @@ describe('Central de Atendimento ao Cliente TAT', function () {
                 expect($input[0].files[0].name).to.equal('example.json')
             })
     })
-    it('verifica que a política de privacidade abre em outra aba sem a necessidade de um clique', function(){
+    it('verifica que a política de privacidade abre em outra aba sem a necessidade de um clique', function () {
         cy.get('#privacy a').should('have.attr', 'target', '_blank')
-    })        
-    it('teste a página da política de privadidade de forma independente', function(){
-        cy.get('#privacy a')
-            .should('have.attr', 'target', '_blank')
-            .invoke('removeAttr', 'target')
-            .click()
-
-        cy.title().should('be.equal', 'Central de Atendimento ao Cliente TAT - Política de privacidade')
-        cy.get('.privacy p')
-            .should('have.length', 4)
-            .should(function($textVallidation){
-                console.log($textVallidation)
-                expect($textVallidation[0].outerText).to.equal('Não salvamos dados submetidos no formulário da aplicação CAC TAT.')
-                expect($textVallidation[1].outerText).to.equal('Utilzamos as tecnologias HTML, CSS e JavaScript, para simular uma aplicação real.')
-                expect($textVallidation[2].outerText).to.equal('No entanto, a aplicação é um exemplo, sem qualquer persistência de dados, e usada para fins de ensino.')
-                expect($textVallidation[3].outerText).to.equal('Talking About Testing')
-            })
-
-    })  
-    
+    })
 })
