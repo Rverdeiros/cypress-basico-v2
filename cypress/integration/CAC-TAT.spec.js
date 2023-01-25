@@ -15,13 +15,6 @@
 /// <reference types="Cypress" />
 
 describe('Central de Atendimento ao Cliente TAT', function () {
-    const longText = 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.'
-    const firstName = 'Nome Teste'
-    const lastName = 'Sobrenome Teste'
-    const validEmail = 'teste@teste.com'
-    const invalidEmail = 'teste$teste.com'
-    const phone = '32999998888'
-
     beforeEach(function () {
         cy.visit('./src/index.html')
     })
@@ -30,6 +23,8 @@ describe('Central de Atendimento ao Cliente TAT', function () {
     })
     it('preenche os campos obrigatórios e envia o formulário', function () {
 
+        const longText = 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.'
+        
         cy.get('#firstName').type('Nome Teste')
         cy.get('#lastName').type('Sobrenome Teste')
         cy.get('#email').type('teste@teste.com')
@@ -41,10 +36,10 @@ describe('Central de Atendimento ao Cliente TAT', function () {
     })
     it('exibe mensagem de erro ao submeter o formulário com um email com formatação inválida', function () {
 
-        cy.get('#firstName').type(firstName)
-        cy.get('#lastName').type(lastName)
-        cy.get('#email').type(invalidEmail)
-        cy.get('#phone').type(phone)
+        cy.get('#firstName').type('Nome Teste')
+        cy.get('#lastName').type('Sobrenome Teste')
+        cy.get('#email').type('teste@teste.com')
+        cy.get('#phone').type('12345')
 
         cy.contains('button[type="submit"]', 'Enviar').click()
         cy.get('.error').should('be.visible')
@@ -62,7 +57,7 @@ describe('Central de Atendimento ao Cliente TAT', function () {
         cy.get('#phone-checkbox').check()
             .should('be.checked')
 
-        cy.get('#open-text-area').type(longText, { delay: 0 })
+        cy.get('#open-text-area').type('Teste', { delay: 0 })
 
         cy.contains('.button', 'Enviar').click()
         cy.get('.error').should('be.visible')
@@ -71,23 +66,23 @@ describe('Central de Atendimento ao Cliente TAT', function () {
     it('preeenche e limpa os campos nome, sobrenome, email e telefone', function () {
 
         cy.get('#firstName')
-            .type(firstName)
-            .should('have.value', firstName)
+            .type('Nome Teste')
+            .should('have.value', 'Nome Teste')
             .clear()
             .should('have.value', '')
 
-        cy.get('#lastName').type(lastName)
-            .should('have.value', lastName)
+        cy.get('#lastName').type('Sobrenome Teste')
+            .should('have.value', 'Sobrenome Teste')
             .clear()
             .should('have.value', '')
 
-        cy.get('#email').type(validEmail)
-            .should('have.value', validEmail)
+        cy.get('#email').type('email@teste.com')
+            .should('have.value', 'email@teste.com')
             .clear()
             .should('have.value', '')
 
-        cy.get('#phone').type(phone)
-            .should('have.value', phone)
+        cy.get('#phone').type('32999998888')
+            .should('have.value', '32999998888')
             .clear()
             .should('have.value', '')
     })
